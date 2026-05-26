@@ -30,7 +30,7 @@ cd backend
 npm run dev
 ```
 
-**Terminal 2 (Frontend):**
+***Terminal 2 (Frontend):***
 ```bash
 cd frontend
 npm run dev
