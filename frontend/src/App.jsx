@@ -25,3 +25,99 @@ function loadSessions() {
   }
 }
 
+function loadUser() {
+  try {
+    const raw = localStorage.getItem('opsmind_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function App() {
+  const [user, setUser] = useState(loadUser);
+  const [sessions, setSessions] = useState(loadSessions);
+  const [activeSessionId, setActiveSessionId] = useState(null);
+  const [activeView, setActiveView] = useState('chat');
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = useCallback((type, message) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
+
+  const handleNewChat = useCallback(() => {
+    setActiveSessionId(null);
+    setActiveView('chat');
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('opsmind_token');
+    localStorage.removeItem('opsmind_user');
+    setUser(null);
+    setSessions([]);
+    setActiveSessionId(null);
+    setActiveView('chat');
+  };
+
+  const handleDeleteSession = (sessionId) => {
+    setSessions((prev) => {
+      const updated = prev.filter((s) => s.id !== sessionId);
+      localStorage.setItem('opsmind_chat_sessions', JSON.stringify(updated));
+      return updated;
+    });
+    if (activeSessionId === sessionId) {
+      setActiveSessionId(null);
+    }
+  };
+
+  // Show auth page if not logged in
+  if (!user) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
+  return (
+    <div className="app-layout">
+      <Sidebar
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        setActiveSessionId={setActiveSessionId}
+        onNewChat={handleNewChat}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        user={user}
+        onLogout={handleLogout}
+        onDeleteSession={handleDeleteSession}
+      />
+
+      <div className="main-area">
+        {activeView === 'chat' ? (
+          <ChatInterface
+            sessions={sessions}
+            setSessions={setSessions}
+            activeSessionId={activeSessionId}
+            setActiveSessionId={setActiveSessionId}
+          />
+        ) : (
+          <AdminPanel addToast={addToast} user={user} />
+        )}
+      </div>
+
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`toast ${toast.type}`}>
+            <span>{toast.message}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
