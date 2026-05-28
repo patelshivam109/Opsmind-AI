@@ -129,3 +129,127 @@ export default function AuthPage({ onLogin }) {
             </div>
           </div>
 
+          {/* Right — Auth card */}
+          <div className="sl-hero-right">
+            <div className="sl-auth-card">
+              <div className="sl-auth-card-glow" />
+
+              <div className="sl-auth-tabs">
+                <button
+                  id="tab-login"
+                  className={`sl-tab ${mode === 'login' ? 'sl-tab-on' : ''}`}
+                  onClick={() => { setMode('login'); setError(''); setForm({ name: '', email: '', password: '' }); }}
+                >Sign In</button>
+                <button
+                  id="tab-register"
+                  className={`sl-tab ${mode === 'register' ? 'sl-tab-on' : ''}`}
+                  onClick={() => { setMode('register'); setError(''); setForm({ name: '', email: '', password: '' }); }}
+                >Sign Up</button>
+              </div>
+
+              <div className="sl-auth-heading">
+                <h2>{mode === 'login' ? 'Welcome back 👋' : 'Get started free 🚀'}</h2>
+                <p>{mode === 'login' ? 'Access your knowledge workspace' : 'Join your team on OpsMind AI'}</p>
+              </div>
+
+              {error && (
+                <div className="sl-auth-error">
+                  <span>⚠️</span> {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="sl-auth-form" id="auth-form">
+                {mode === 'register' && (
+                  <div className="sl-fld">
+                    <label htmlFor="auth-name">Full Name</label>
+                    <input id="auth-name" type="text" name="name" placeholder="Jane Smith"
+                      value={form.name} onChange={handleChange} required autoComplete="name" />
+                  </div>
+                )}
+                <div className="sl-fld">
+                  <label htmlFor="auth-email">Work Email</label>
+                  <input id="auth-email" type="email" name="email" placeholder="you@company.com"
+                    value={form.email} onChange={handleChange} required autoComplete="email" />
+                </div>
+                <div className="sl-fld">
+                  <label htmlFor="auth-password">Password</label>
+                  <div className="sl-pass">
+                    <input id="auth-password"
+                      type={showPass ? 'text' : 'password'}
+                      name="password"
+                      placeholder={mode === 'register' ? 'Min. 6 characters' : '••••••••'}
+                      value={form.password} onChange={handleChange} required
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    />
+                    <button type="button" className="sl-eye" onClick={() => setShowPass(v => !v)} tabIndex={-1}>
+                      {showPass ? '🙈' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" className="sl-auth-btn" disabled={loading} id="auth-submit">
+                  {loading
+                    ? <><span className="spin">⟳</span> {mode === 'login' ? 'Signing in…' : 'Creating account…'}</>
+                    : mode === 'login' ? 'Sign In →' : 'Create Account →'
+                  }
+                </button>
+              </form>
+
+              <p className="sl-auth-switch">
+                {mode === 'login' ? "No account?" : "Have an account?"}
+                {' '}
+                <button id="auth-switch" className="sl-auth-link"
+                  onClick={() => { setMode(m => m === 'login' ? 'register' : 'login'); setError(''); setForm({ name: '', email: '', password: '' }); }}>
+                  {mode === 'login' ? 'Sign up free' : 'Sign in'}
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ─────────────────────────────────────────── */}
+      <section className="sl-features">
+        <div className="sl-features-inner">
+          <div className="sl-section-label">Everything you need</div>
+          <h2 className="sl-section-title">Built for enterprise knowledge teams</h2>
+          <p className="sl-section-sub">
+            From HR handbooks to compliance SOPs — OpsMind AI makes every document instantly queryable.
+          </p>
+
+          <div className="sl-feature-grid">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="sl-feature-card">
+                <div className="sl-feature-icon-wrap" style={{ '--fc': f.color }}>
+                  <span className="sl-feature-emoji">{f.icon}</span>
+                </div>
+                <div className="sl-feature-body">
+                  <div className="sl-feature-name">{f.title}</div>
+                  <div className="sl-feature-desc">{f.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────────── */}
+      <footer className="sl-footer">
+        <div className="sl-footer-inner">
+          <div className="sl-footer-brand">
+            <span>🧠</span>
+            <span>OpsMind AI</span>
+            <span className="sl-footer-sep">·</span>
+            <span className="sl-footer-copy">© 2025 All rights reserved.</span>
+          </div>
+          <div className="sl-footer-links">
+            {['Privacy', 'Terms', 'Security', 'Support'].map(l => (
+              <span key={l} className="sl-footer-link">{l}</span>
+            ))}
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}
