@@ -162,3 +162,155 @@ export default function ChatInterface({ sessions, setSessions, activeSessionId, 
           )
         );
       },
+
+      onSources: (sources) => {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === sessionId
+              ? {
+                  ...s,
+                  messages: s.messages.map((m) =>
+                    m.id === aiMsgId ? { ...m, sources } : m
+                  ),
+                }
+              : s
+          )
+        );
+      },
+
+      onDone: () => {
+        setSessions((prev) => {
+          const updated = prev.map((s) =>
+            s.id === sessionId
+              ? {
+                  ...s,
+                  messages: s.messages.map((m) =>
+                    m.id === aiMsgId
+                      ? { ...m, streaming: false, thinking: false }
+                      : m
+                  ),
+                }
+              : s
+          );
+          saveSessions(updated);
+          return updated;
+        });
+        setIsLoading(false);
+      },
+
+      onError: (errorMsg) => {
+        setSessions((prev) => {
+          const updated = prev.map((s) =>
+            s.id === sessionId
+              ? {
+                  ...s,
+                  messages: s.messages.map((m) =>
+                    m.id === aiMsgId
+                      ? {
+                          ...m,
+                          content: `❌ **Error:** ${errorMsg}`,
+                          thinking: false,
+                          streaming: false,
+                        }
+                      : m
+                  ),
+                }
+              : s
+          );
+          saveSessions(updated);
+          return updated;
+        });
+        setIsLoading(false);
+      },
+    });
+
+    abortRef.current = abort;
+  }, [input, isLoading, activeSessionId, messages, setSessions, setActiveSessionId]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <div className="chat-area">
+      {/* Header */}
+      <div className="chat-header">
+        <div>
+          <div className="chat-header-title">OpsMind AI Assistant</div>
+          <div className="chat-header-sub">Ask anything about your company SOPs</div>
+        </div>
+        <div className="chat-header-badges">
+          <span className="badge badge-blue">⚡ Gemini 2.5 Flash</span>
+          <span className="badge badge-purple">🔒 CitedOnly™</span>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="messages-container">
+        {messages.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">🧠</div>
+            <h2>Ask your SOPs anything</h2>
+            <p>
+              I'll instantly search your company's SOP documents and provide
+              accurate, cited answers. Every response references the exact page
+              and section.
+            </p>
+            <div className="suggestion-grid">
+              {SUGGESTIONS.map((s, i) => (
+                <div
+                  key={i}
+                  className="suggestion-card"
+                  onClick={() => sendMessage(s.query)}
+                >
+                  <span className="s-icon">{s.icon}</span>
+                  <div className="s-title">{s.title}</div>
+                  <div className="s-sub">{s.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <MessageBubble key={msg.id} message={msg} />
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="chat-input-area">
+        <div className="chat-input-wrapper">
+          <textarea
+            ref={textareaRef}
+            className="chat-textarea"
+            placeholder="Ask about a policy, procedure, or process..."
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            disabled={isLoading}
+            id="chat-input"
+          />
+          <div className="chat-input-actions">
+            <button
+              className="btn-send"
+              onClick={() => sendMessage()}
+              disabled={isLoading || !input.trim()}
+              id="btn-send-message"
+              title="Send message (Enter)"
+            >
+              {isLoading ? <span className="spin">⟳</span> : '↑'}
+            </button>
+          </div>
+        </div>
+        <div className="input-hint">
+          Press <strong>Enter</strong> to send · <strong>Shift+Enter</strong> for new line
+        </div>
+      </div>
+    </div>
+  );
+}
