@@ -31,3 +31,30 @@ export default function MessageBubble({ message }) {
             </span>
           </div>
         )}
+
+        {/* Message bubble */}
+        {message.content && (
+          <div className={`message-bubble ${isStreaming ? 'streaming-cursor' : ''}`}>
+            {isUser ? (
+              <span>{message.content}</span>
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.content}
+              </ReactMarkdown>
+            )}
+          </div>
+        )}
+
+        {/* Source citations (only for AI messages that are done) */}
+        {!isUser && !isStreaming && message.sources && message.sources.length > 0 && (
+          <SourceCitation sources={message.sources} />
+        )}
+
+        {/* Timestamp */}
+        {message.timestamp && (
+          <div className="message-time">{formatTime(message.timestamp)}</div>
+        )}
+      </div>
+    </div>
+  );
+}
