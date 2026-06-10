@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import AdminPanel from './components/AdminPanel';
 import AuthPage from './components/AuthPage';
+import { fetchCurrentUser } from './services/api';
 import './index.css';
 
 const SESSIONS_KEY = 'opsmind_chat_sessions';
@@ -66,6 +67,23 @@ export default function App() {
     setActiveSessionId(null);
     setActiveView('chat');
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('opsmind_token');
+    if (!token) return;
+
+    fetchCurrentUser()
+      .then(({ user: freshUser }) => {
+        if (!freshUser) return;
+        localStorage.setItem('opsmind_user', JSON.stringify(freshUser));
+        setUser(freshUser);
+      })
+      .catch(() => {
+        localStorage.removeItem('opsmind_token');
+        localStorage.removeItem('opsmind_user');
+        setUser(null);
+      });
+  }, []);
 
   const handleDeleteSession = (sessionId) => {
     setSessions((prev) => {

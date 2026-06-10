@@ -1,144 +1,174 @@
-# OpsMind AI — Enterprise SOP Knowledge Agent
+# OpsMind AI - Enterprise SOP Knowledge Agent
 
-A production-ready RAG (Retrieval-Augmented Generation) system that answers employee questions from your company SOPs with precise source citations and zero hallucinations.
+OpsMind AI is a Retrieval-Augmented Generation (RAG) application that lets employees ask questions against company SOP PDFs and receive source-cited answers.
 
-## ⚡ Quick Start
+The active backend for this project is `backend_local`.
 
-### Prerequisites
+## Current Features
+
+- User registration and login with JWT authentication
+- Role-based access for employees and admins
+- Admin-only PDF upload and document deletion
+- Background PDF parsing, chunking, embedding, and indexing
+- MongoDB Atlas Vector Search retrieval with keyword fallback
+- Gemini-powered streaming chat answers through Server-Sent Events
+- Source citations with document name and page number
+- Local chat session history in the browser
+- Knowledge base dashboard with document status and chunk statistics
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 18, Vite |
+| Backend | Node.js, Express |
+| Database | MongoDB Atlas |
+| Auth | JWT, bcryptjs |
+| PDF Parsing | pdf-parse |
+| Embeddings | Gemini `gemini-embedding-001` |
+| Chat Model | Gemini Flash model fallback chain |
+| Streaming | Server-Sent Events |
+
+## Prerequisites
+
 - Node.js 18+
-- MongoDB Atlas account (free M0 tier works)
-- Google Gemini API Key
+- MongoDB Atlas cluster
+- Google Gemini API key
+- MongoDB Atlas Vector Search index
 
----
+## Backend Setup
 
-## 🔧 Setup
+Create `backend_local/.env` from `backend_local/.env.example`:
 
-### Step 1 — Backend Configuration
-
-Edit `backend/.env`:
-```
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+```env
+MONGO_URI=your_mongodb_atlas_connection_string_here
 GEMINI_API_KEY=your_gemini_api_key_here
+JWT_SECRET=replace_with_a_strong_secret
 PORT=5000
+NODE_ENV=development
 ```
 
-### Step 2 — Start Servers
+Install and run the backend:
 
-**Terminal 1 (Backend):**
 ```bash
-cd backend
+cd backend_local
+npm install
 npm run dev
 ```
 
-***Terminal 2 (Frontend):***
+Backend URL:
+
+```text
+http://localhost:5000
+```
+
+## Frontend Setup
+
+Install and run the frontend:
+
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-Open: **http://localhost:5173**
+Frontend URL:
 
----
+```text
+http://localhost:5173
+```
 
-## 🔍 MongoDB Atlas Vector Search Index Setup
+The Vite dev server proxies `/api` requests to `http://localhost:5000`.
 
-> This is required before the RAG search will work!
+## MongoDB Atlas Vector Search Index
 
-1. Go to [MongoDB Atlas](https://cloud.mongodb.com)
-2. Navigate to your cluster → **Search Indexes** (or **Atlas Search**)
-3. Click **Create Search Index** → Choose **JSON Editor**
-4. Select database: `opsmind`, collection: `chunks`
-5. Set index name: **`sop_vector_index`**
-6. Paste this JSON:
+Create a Vector Search index in MongoDB Atlas:
+
+- Database: `opsmind`
+- Collection: `chunks`
+- Index name: `sop_vector_index`
+
+Use this JSON:
 
 ```json
 {
   "fields": [{
     "type": "vector",
     "path": "embedding",
-    "numDimensions": 768,
+    "numDimensions": 3072,
     "similarity": "cosine"
   }]
 }
 ```
 
-7. Click **Create** (takes ~2 minutes to build)
+The embedding dimension must be `3072` because the backend uses Gemini `gemini-embedding-001`.
 
----
+## Admin Setup
 
-## 🏗️ Architecture
+After configuring `backend_local/.env`, create or promote an admin user:
 
-```
-User Question → [Embed Query] → [MongoDB Atlas Vector Search]
-                                        ↓
-                            Top 5 Most Relevant SOP Chunks
-                                        ↓
-                         [Gemini 1.5 Flash with Context]
-                                        ↓
-                        Streaming Answer + Source Citations
+```bash
+cd backend_local
+node scripts/makeAdmin.js
 ```
 
-### Tech Stack
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + Vite |
-| Backend | Node.js + Express |
-| PDF Parsing | `pdf-parse` |
-| Embeddings | Gemini `text-embedding-004` (768 dims) |
-| LLM | Gemini `gemini-1.5-flash` |
-| Vector DB | MongoDB Atlas Vector Search |
-| Streaming | Server-Sent Events (SSE) |
+To promote a specific existing user:
 
----
-
-## 🛡️ Anti-Hallucination
-
-The system prompt strictly instructs the AI to:
-1. Answer **only** from provided SOP context
-2. **Cite every claim** with document name + page number
-3. Respond with `"I don't have information about this..."` for off-topic questions
-4. **Never fabricate** policies, procedures, or document names
-
----
-
-## 📋 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/docs/upload` | Upload a PDF (multipart/form-data, field: `pdf`) |
-| `GET` | `/api/docs` | List all documents + stats |
-| `DELETE` | `/api/docs/:id` | Delete document + all chunks |
-| `POST` | `/api/chat` | Send a query, receive SSE stream |
-| `GET` | `/api/chat/health` | Health check |
-
----
-
-## 📁 Project Structure
-
+```bash
+node scripts/makeAdmin.js user@example.com
 ```
-opsmind-ai/
-├── backend/
-│   ├── src/
-│   │   ├── config/db.js          # MongoDB connection
-│   │   ├── models/
-│   │   │   ├── Document.js       # PDF metadata model
-│   │   │   └── Chunk.js          # Text chunk + embedding model
-│   │   ├── services/
-│   │   │   ├── pdfService.js     # PDF parse + 1000-char chunking
-│   │   │   ├── embeddingService.js # Gemini text-embedding-004
-│   │   │   └── ragService.js     # Vector search + LLM streaming
-│   │   ├── routes/
-│   │   │   ├── documents.js      # Upload/list/delete endpoints
-│   │   │   └── chat.js           # SSE chat endpoint
-│   │   └── server.js
-│   └── .env
-└── frontend/
-    └── src/
-        ├── components/
-        │   ├── ChatInterface.jsx  # Main chat + SSE streaming
-        │   ├── MessageBubble.jsx  # AI/User messages + markdown
-        │   ├── SourceCitation.jsx # Clickable source cards
-        │   ├── AdminPanel.jsx     # Upload/manage documents
-        │   └── Sidebar.jsx        # Navigation + chat history
-        └── services/api.js        # API + SSE client
+
+Default generated admin credentials:
+
+```text
+Email: admin@opsmind.ai
+Password: Admin@123
+```
+
+Change this password after first login.
+
+## API Endpoints
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Register an employee user |
+| `POST` | `/api/auth/login` | Login and receive JWT |
+| `GET` | `/api/auth/me` | Verify current token |
+| `POST` | `/api/docs/upload` | Admin-only PDF upload |
+| `GET` | `/api/docs` | List documents and stats |
+| `GET` | `/api/docs/:id` | Get one document summary |
+| `DELETE` | `/api/docs/:id` | Admin-only document deletion |
+| `POST` | `/api/chat` | Ask a question and stream the answer |
+| `GET` | `/api/chat/health` | Chat health check |
+
+## Review Demo Flow
+
+1. Start `backend_local` and `frontend`.
+2. Login as admin.
+3. Open Knowledge Base.
+4. Show the Atlas index JSON and document dashboard.
+5. Upload a sample SOP PDF.
+6. Wait for status to become `Indexed`.
+7. Ask a question in chat that is answerable from the uploaded PDF.
+8. Show streaming answer, citations, and source cards.
+9. Ask an unrelated question and show the controlled "no information" behavior.
+10. Login or register as a normal employee and show that upload/delete actions are restricted.
+
+## Verification
+
+The following checks were run successfully:
+
+```bash
+cd frontend
+npm run build
+```
+
+```bash
+cd backend_local
+node -c src/server.js
+node -c src/routes/auth.js
+node -c src/routes/documents.js
+node -c src/routes/chat.js
+node -c src/services/ragService.js
+node -c src/services/embeddingService.js
 ```

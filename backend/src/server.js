@@ -10,9 +10,6 @@ const chatRouter = require('./routes/chat');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB Atlas
-connectDB();
-
 // Middleware
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
@@ -49,10 +46,26 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 OpsMind AI Backend running on http://localhost:${PORT}`);
-  console.log(`📚 Upload SOPs at: http://localhost:${PORT}/api/docs/upload`);
-  console.log(`💬 Chat endpoint: http://localhost:${PORT}/api/chat\n`);
-});
+const startServer = async () => {
+  await connectDB();
+
+  const server = app.listen(PORT, () => {
+    console.log(`\nOpsMind AI Backend running on http://localhost:${PORT}`);
+    console.log(`Upload SOPs at: http://localhost:${PORT}/api/docs/upload`);
+    console.log(`Chat endpoint: http://localhost:${PORT}/api/chat\n`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Stop the existing backend or set a different PORT in .env.`);
+      process.exit(1);
+    }
+
+    console.error('Server failed to start:', error.message);
+    process.exit(1);
+  });
+};
+
+startServer();
 
 module.exports = app;

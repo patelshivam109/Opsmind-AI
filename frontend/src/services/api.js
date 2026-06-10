@@ -28,12 +28,17 @@ export const uploadDocument = async (file, onProgress) => {
 };
 
 export const fetchDocuments = async () => {
-  const response = await axios.get(`${BASE_URL}/docs`);
+  const response = await axios.get(`${BASE_URL}/docs`, { headers: getAuthHeaders() });
   return response.data;
 };
 
 export const deleteDocument = async (id) => {
   const response = await axios.delete(`${BASE_URL}/docs/${id}`, { headers: getAuthHeaders() });
+  return response.data;
+};
+
+export const fetchCurrentUser = async () => {
+  const response = await axios.get(`${BASE_URL}/auth/me`, { headers: getAuthHeaders() });
   return response.data;
 };
 
@@ -54,7 +59,7 @@ export const sendChatMessage = (query, chatHistory, callbacks) => {
 
   fetch(`${BASE_URL}/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ query, chatHistory }),
     signal: controller.signal,
   })

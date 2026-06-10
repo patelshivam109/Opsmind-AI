@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { search, streamAnswer } = require('../services/ragService');
 
 /**
@@ -7,7 +8,7 @@ const { search, streamAnswer } = require('../services/ragService');
  * Main RAG chat endpoint with SSE streaming
  * Body: { query: string, chatHistory: [{role, content}] }
  */
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   const { query, chatHistory = [] } = req.body;
 
   if (!query || typeof query !== 'string' || query.trim().length === 0) {

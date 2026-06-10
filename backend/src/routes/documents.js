@@ -98,7 +98,7 @@ router.post('/upload', authMiddleware, adminMiddleware, upload.single('pdf'), as
  * GET /api/docs
  * List all documents with stats
  */
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const documents = await Document.find().sort({ createdAt: -1 });
     const totalChunks = await Chunk.countDocuments();
@@ -121,7 +121,7 @@ router.get('/', async (req, res) => {
  * GET /api/docs/:id
  * Get a single document with its chunks
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const doc = await Document.findById(req.params.id);
     if (!doc) return res.status(404).json({ error: 'Document not found' });

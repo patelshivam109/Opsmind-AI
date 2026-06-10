@@ -189,6 +189,26 @@ export default function AdminPanel({ addToast, user }) {
           ))}
         </div>
 
+        {isAdmin && (
+          <div className="kb-flow">
+            <div className="kb-flow-step">
+              <span>1</span>
+              <strong>Upload PDF</strong>
+              <small>Add SOP, policy, handbook, or process PDFs here.</small>
+            </div>
+            <div className="kb-flow-step">
+              <span>2</span>
+              <strong>Wait for Indexed</strong>
+              <small>The backend extracts text, chunks it, and stores embeddings.</small>
+            </div>
+            <div className="kb-flow-step">
+              <span>3</span>
+              <strong>Ask in Chat</strong>
+              <small>OpsMind answers from the indexed knowledge base with sources.</small>
+            </div>
+          </div>
+        )}
+
         {/* Atlas banner — admin only */}
         {isAdmin && (
           <div className="setup-banner">
