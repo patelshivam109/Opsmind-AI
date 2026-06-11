@@ -51,6 +51,12 @@ router.post('/upload', authMiddleware, adminMiddleware, upload.single('pdf'), as
       const { chunks, pageCount } = await processPDF(filePath, originalName);
       console.log(`  ✂️  Created ${chunks.length} chunks from ${pageCount} pages`);
 
+      if (chunks.length === 0) {
+        throw new Error(
+          'No readable text was found in this PDF. Please upload a text-based PDF instead of a scanned image PDF.'
+        );
+      }
+
       // 2. Generate embeddings for all chunks
       const texts = chunks.map((c) => c.text);
       const embeddings = await embedBatch(texts);

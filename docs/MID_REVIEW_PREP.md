@@ -103,7 +103,7 @@ User question
 Storage:
 
 - `documents` collection stores PDF metadata, status, page count, and chunk count.
-- `chunks` collection stores chunk text, source metadata, and 3072-dimension embeddings.
+- `chunks` collection stores chunk text, source metadata, and 768-dimension embeddings by default.
 
 Security:
 
@@ -147,7 +147,7 @@ Production deployment, persistent server-side chat history, better document prev
 
 - Pull latest code and confirm `backend_local` is the active backend.
 - Confirm `.env` values are present.
-- Confirm Atlas index uses `numDimensions: 3072`.
+- Confirm Atlas index uses `numDimensions: 768` unless `EMBEDDING_DIMS` is changed.
 - Run backend and frontend.
 - Run `npm run build` in `frontend`.
 - Login as admin successfully.

@@ -95,13 +95,13 @@ Use this JSON:
   "fields": [{
     "type": "vector",
     "path": "embedding",
-    "numDimensions": 3072,
+    "numDimensions": 768,
     "similarity": "cosine"
   }]
 }
 ```
 
-The embedding dimension must be `3072` because the backend uses Gemini `gemini-embedding-001`.
+The embedding dimension must match `EMBEDDING_DIMS` in the backend. The default is `768`, which is a recommended Gemini embedding dimension and matches the setup JSON above.
 
 ## Admin Setup
 

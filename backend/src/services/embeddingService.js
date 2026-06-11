@@ -11,14 +11,25 @@ const getClient = () => {
 
 // ✅ Correct model name as returned by ListModels API
 const EMBEDDING_MODEL = 'gemini-embedding-001';
-const EMBEDDING_DIMS = 3072;       // gemini-embedding-001 produces 3072-dim vectors
+const EMBEDDING_DIMS = Number.parseInt(process.env.EMBEDDING_DIMS || '768', 10);
 const BATCH_SIZE = 10;             // stay conservative
 const RATE_LIMIT_DELAY = 600;      // ms between batches
+
+if (!Number.isInteger(EMBEDDING_DIMS) || EMBEDDING_DIMS < 1 || EMBEDDING_DIMS > 3072) {
+  throw new Error('EMBEDDING_DIMS must be an integer between 1 and 3072.');
+}
 
 /**
  * Sleep helper for rate limiting
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const fitEmbeddingDimensions = (values) => {
+  if (!Array.isArray(values)) return new Array(EMBEDDING_DIMS).fill(0);
+  if (values.length === EMBEDDING_DIMS) return values;
+  if (values.length > EMBEDDING_DIMS) return values.slice(0, EMBEDDING_DIMS);
+  return [...values, ...new Array(EMBEDDING_DIMS - values.length).fill(0)];
+};
 
 /**
  * Generate embedding for a single text (used at query time)
@@ -29,7 +40,7 @@ const embedText = async (text) => {
   const result = await model.embedContent({
     content: { parts: [{ text }], role: 'user' },
   });
-  return result.embedding.values;
+  return fitEmbeddingDimensions(result.embedding.values);
 };
 
 /**
@@ -53,7 +64,7 @@ const embedBatch = async (texts) => {
           const result = await model.embedContent({
             content: { parts: [{ text }], role: 'user' },
           });
-          return result.embedding.values;
+          return fitEmbeddingDimensions(result.embedding.values);
         } catch (err) {
           console.error('Embedding error for chunk, using zero vector:', err.message);
           return new Array(EMBEDDING_DIMS).fill(0); // fallback zero vector

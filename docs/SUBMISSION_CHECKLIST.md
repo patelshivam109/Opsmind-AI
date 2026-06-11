@@ -92,7 +92,7 @@ Status: Ready
 
 Challenges to mention:
 
-- Correct vector index dimension is required: `3072`.
+- Correct vector index dimension is required: `768` by default, or whatever `EMBEDDING_DIMS` is set to.
 - AI API quota/service availability can affect live demos.
 - PDF extraction quality depends on source PDFs.
 - Page numbers are approximate after text extraction.

@@ -5,7 +5,7 @@ const VECTOR_INDEX_JSON = `{
   "fields": [{
     "type": "vector",
     "path": "embedding",
-    "numDimensions": 3072,
+    "numDimensions": 768,
     "similarity": "cosine"
   }]
 }`;
@@ -74,6 +74,7 @@ export default function AdminPanel({ addToast, user }) {
   const [dragOver, setDragOver] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [copiedJson, setCopiedJson] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const fileInputRef = useRef(null);
   const pollRef = useRef(null);
 
@@ -82,8 +83,9 @@ export default function AdminPanel({ addToast, user }) {
       const data = await fetchDocuments();
       setDocs(data.documents || []);
       setStats(data.stats || {});
+      setLoadError('');
     } catch (err) {
-      // silently fail on poll
+      setLoadError(err.response?.data?.error || err.message || 'Unable to load documents.');
     } finally {
       setLoading(false);
     }
@@ -218,7 +220,7 @@ export default function AdminPanel({ addToast, user }) {
               </svg>
             </div>
             <div>
-              <div className="setup-banner-title">Atlas Vector Search Setup (3072 dims)</div>
+              <div className="setup-banner-title">Atlas Vector Search Setup (768 dims)</div>
               <div className="setup-banner-text">
                 Go to <strong>MongoDB Atlas → Cluster → Search Indexes</strong>, create a Vector Search index
                 on the <code>chunks</code> collection named <code>sop_vector_index</code>.{' '}
@@ -297,6 +299,17 @@ export default function AdminPanel({ addToast, user }) {
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
               </div>
               <p>Loading documents…</p>
+            </div>
+          ) : loadError ? (
+            <div className="empty-docs">
+              <div className="empty-docs-icon">
+                <IconDoc />
+              </div>
+              <h3>Could not load documents</h3>
+              <p>{loadError}</p>
+              <button className="btn-refresh" onClick={loadDocs} title="Retry">
+                <IconRefresh /> Retry
+              </button>
             </div>
           ) : docs.length === 0 ? (
             <div className="empty-docs">

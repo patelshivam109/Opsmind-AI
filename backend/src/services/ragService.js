@@ -62,7 +62,7 @@ const vectorSearch = async (queryEmbedding, queryText) => {
       },
     ]);
 
-    return results;
+    return results.length > 0 ? results : recentChunkFallback();
   } catch (error) {
     console.warn('Vector search failed, falling back to text search:', error.message);
 
@@ -74,7 +74,7 @@ const vectorSearch = async (queryEmbedding, queryText) => {
       .split(/\s+/)
       .filter((w) => w.length > 3);
 
-    if (keywords.length === 0) return [];
+    if (keywords.length === 0) return recentChunkFallback();
 
     // Build a simple regex OR query across all keywords
     const regexPattern = keywords.join('|');
@@ -84,9 +84,22 @@ const vectorSearch = async (queryEmbedding, queryText) => {
       .limit(TOP_K)
       .lean();
 
-    // Add a synthetic score
-    return fallback.map((chunk) => ({ ...chunk, score: 0.6 }));
+    if (fallback.length > 0) {
+      // Add a synthetic score
+      return fallback.map((chunk) => ({ ...chunk, score: 0.6 }));
+    }
+
+    return recentChunkFallback();
   }
+};
+
+const recentChunkFallback = async () => {
+  const chunks = await Chunk.find()
+    .sort({ createdAt: -1 })
+    .limit(TOP_K)
+    .lean();
+
+  return chunks.map((chunk) => ({ ...chunk, score: 0.3 }));
 };
 
 
