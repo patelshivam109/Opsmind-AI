@@ -13,7 +13,7 @@ The active backend for this project is `backend_local`.
 - MongoDB Atlas Vector Search retrieval with keyword fallback
 - Gemini-powered streaming chat answers through Server-Sent Events
 - Source citations with document name and page number
-- Local chat session history in the browser
+- Local chat session history in the browser.
 - Knowledge base dashboard with document status and chunk statistics
 
 ## Tech Stack
