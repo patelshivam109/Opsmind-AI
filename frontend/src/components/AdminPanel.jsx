@@ -351,23 +351,3 @@ export default function AdminPanel({ addToast, user }) {
           )}
         </div>
       </div>
-
-      {/* Delete Confirmation */}
-      {deleteTarget && (
-        <div className="delete-confirm-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="delete-confirm-card" onClick={(e) => e.stopPropagation()}>
-            <h3>Delete Document?</h3>
-            <p>
-              This will permanently remove <strong>"{deleteTarget.originalName}"</strong> and all
-              its indexed chunks. This cannot be undone.
-            </p>
-            <div className="delete-actions">
-              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>Cancel</button>
-              <button className="btn-confirm-delete" onClick={confirmDelete} id="btn-confirm-delete">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
