@@ -9,7 +9,7 @@ async function run() {
   const db = client.db();
   const users = db.collection('users');
 
-  // Show all users and their roles
+  
   const all = await users.find({}, { projection: { email: 1, role: 1, name: 1 } }).toArray();
   console.log('\nAll users in DB:');
   all.forEach(u => console.log(' -', u.email, '|', u.role));
