@@ -101,7 +101,21 @@ export default function Sidebar({
           <span>RAG Pipeline Active</span>
         </div>
 
-
+        {user && (
+          <div className="sidebar-user">
+            <div className="sidebar-user-avatar">
+              {user.name ? user.name.charAt(0).toUpperCase() : '?'}
+            </div>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{user.name}</div>
+              <div className="sidebar-user-email">{user.email}</div>
+            </div>
+            <button
+              className="btn-logout"
+              onClick={onLogout}
+              id="btn-logout"
+              title="Sign out"
+            >
               ⏻
             </button>
           </div>
