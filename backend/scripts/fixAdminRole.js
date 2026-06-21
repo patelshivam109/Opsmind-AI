@@ -21,7 +21,7 @@ async function run() {
   );
   console.log('\nUpdate matched:', result.matchedCount, '| modified:', result.modifiedCount);
 
-  // Verify
+  
   const verify = await users.findOne({ email: 'admin@opsmind.ai' });
   console.log('\nVerified role:', verify?.role);
 
