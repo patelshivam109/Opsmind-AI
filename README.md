@@ -2,7 +2,7 @@
 
 OpsMind AI is a Retrieval-Augmented Generation (RAG) application that lets employees ask questions against company SOP PDFs and receive source-cited answers.
 
-The active backend for this project is `backend_local`.
+The active backend for this project is `backend`.
 
 ## Current Features
 
