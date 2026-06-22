@@ -21,7 +21,7 @@ async function run() {
   let user = await User.findOne({ email: targetEmail });
 
   if (user) {
-    // Promote existing user
+   
     user.role = 'admin';
     await user.save();
     console.log(`✅ Promoted existing user to admin:`);
