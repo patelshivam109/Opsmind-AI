@@ -14,7 +14,7 @@ async function run() {
   console.log('\nAll users in DB:');
   all.forEach(u => console.log(' -', u.email, '|', u.role));
 
-  // Force admin@opsmind.ai to admin
+  
   const result = await users.updateOne(
     { email: 'admin@opsmind.ai' },
     { $set: { role: 'admin' } }
