@@ -59,14 +59,7 @@ export default function App() {
     setUser(userData);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('opsmind_token');
-    localStorage.removeItem('opsmind_user');
-    setUser(null);
-    setSessions([]);
-    setActiveSessionId(null);
-    setActiveView('chat');
-  };
+
 
   useEffect(() => {
     const token = localStorage.getItem('opsmind_token');
