@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Global error handler
+
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   if (err.code === 'LIMIT_FILE_SIZE') {
