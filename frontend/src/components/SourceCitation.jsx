@@ -19,7 +19,7 @@ export default function SourceCitation({ sources }) {
   const [expanded, setExpanded] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  if (!sources || sources.length === 0) return null;
+ 
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(VECTOR_INDEX_JSON);
